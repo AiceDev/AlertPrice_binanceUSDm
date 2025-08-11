@@ -43,21 +43,35 @@ async function webSocketData_tickerPrice_Alert(symbol, ts) {
 
 //the function who triggers Alarm from datas
 async function AlertPrice_check(symbol, priceAlert, ts) {
-    while(data[`${symbol}_${ts}`].alaram_notYet_triggered) {
+    let localisation_priceAlert = ""
+    let localisationSet = false
+    while(data[`${symbol}_${ts}`].alaram_notYet_triggered && !localisationSet) {
         if(!(data[`${symbol}_${ts}`].priceAlertStart === undefined)) {
 
             if(data[`${symbol}_${ts}`].priceAlertStart > priceAlert) {
-                if(data[`${symbol}_${ts}`].lastPrice <= priceAlert) {
-                    Alarm();
-                    console.log(`__${symbol} is below ${priceAlert}$`)
-                    data[`${symbol}_${ts}`].alaram_notYet_triggered = false
-                }
+                localisation_priceAlert = "below"
+                localisationSet = true
             } else {
-                if(data[`${symbol}_${ts}`].lastPrice >= priceAlert) {
-                    Alarm();
-                    console.log(`__${symbol} is above ${priceAlert}$`)
-                    data[`${symbol}_${ts}`].alaram_notYet_triggered = false
-                }
+                localisation_priceAlert = "above"
+                localisationSet = true
+            }
+        }
+
+        await sleep(100);
+    }
+
+    while(data[`${symbol}_${ts}`].alaram_notYet_triggered) {
+        if(localisation_priceAlert == "below") {
+            if(data[`${symbol}_${ts}`].lastPrice <= priceAlert) {
+                Alarm();
+                console.log(`__${symbol} is below ${priceAlert}$`)
+                data[`${symbol}_${ts}`].alaram_notYet_triggered = false
+            }
+        } else {
+            if(data[`${symbol}_${ts}`].lastPrice >= priceAlert) {
+                Alarm();
+                console.log(`__${symbol} is above ${priceAlert}$`)
+                data[`${symbol}_${ts}`].alaram_notYet_triggered = false
             }
         }
 
@@ -81,8 +95,8 @@ async function Alert(symbol, priceAlert) {
 }
 
 //exemple
-Alert("BTC", 121690.2)
-Alert("BTC", 121619.3)
+Alert("BTC", 121423.4)
+Alert("BTC", 121338.1)
 
 //check
 setInterval(() => {
